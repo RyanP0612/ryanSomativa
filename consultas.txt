@@ -1,0 +1,100 @@
+
+#ETAPA2 SELECT
+
+#Crie uma consulta que mostre todas as tarefas ainda não iniciadas com as informações de seus 
+#respectivos envolvidos no processo;
+
+select *from responsible p
+inner join taskFinal t on p.taskBaseFK=t.taskFK
+inner join users u on u.id = p.id
+inner join taskBase tb on tb.id = p.id
+where progressFK = 8
+ ;
+ 
+ #Crie uma consulta que mostre todos os locais que tiveram associação a mais de duas tarefas;
+ 
+
+
+select c.localFK, l.name, count(localFK) as totalCheckIn from taskFinal c
+join local l on l.id = c.localFK
+group by localFK
+having totalCheckIn in 
+(SELECT localFK FROM taskFinal GROUP BY localFK HAVING COUNT(localFK) > 1 ORDER BY count(localFK));
+
+
+#Crie uma consulta que mostre todos os usuários que tiveram associação a duas tarefas no mínimo
+select c.usersFK, u.name, count(usersFK) as totalCheckIn from responsible c
+join users u on u.id = c.usersFK
+group by usersFK
+having totalCheckIn in 
+(SELECT usersFK FROM responsible GROUP BY usersFK HAVING COUNT(usersFK) > 1 ORDER BY count(usersFK));
+
+
+
+# Crie uma consulta que mostre todos eventos que ainda acontecerão e as tarefas que ainda não
+#foram executadas nos locais destes eventos (essa consulta ajudará a gestão visualizar se há algum 
+#problema que pode impactar os eventos);
+
+
+select taskBaseFK,tb.title,tb.requester,l.name,t.progressFK as test from responsible p
+inner join taskFinal t on p.taskBaseFK=t.taskFK
+inner join taskBase tb on p.taskBaseFK = tb.id
+inner join local l  on t.localFK=l.id
+inner join event e on e.localFK=l.id
+where progressFK = 8;
+
+#Crie uma consulta que mostre os locais e a quantidade de tarefas existentes (independente do 
+#status);
+
+select tb.title, count(tb.id), u.name from responsible p
+inner join taskFinal t on p.taskBaseFK=t.taskFK
+inner join local u on u.id = p.id
+inner join taskBase tb on tb.id = p.id
+group by tb.id
+having count(tb.id)
+ ;
+ 
+ #Crie uma consulta que mostre os locais e a quantidade de tarefas concluídas;
+ select tb.title, count(tb.id), u.name from responsible p
+inner join taskFinal t on p.taskBaseFK=t.taskFK
+inner join local u on u.id = p.id
+inner join taskBase tb on tb.id = p.id
+where progressFK != 8
+group by tb.id;
+
+#Crie uma consulta que mostre os usuários e quantas tarefas possuem atribuídas (independente do stts)
+select tb.title, count(tb.id), u.name from responsible p
+inner join taskFinal t on p.taskBaseFK=t.taskFK
+inner join users u on u.id = p.id
+inner join taskBase tb on tb.id = p.id
+group by tb.id
+having count(tb.id);
+
+#crie uma consulta que mostre os usuários e quantas tarefas possuem atribuídas concluídas
+#nao consegui
+select taskInProgress,count(p.id) as test from progress p
+inner join taskFinal t on t.progressFK = p.id
+where taskInProgress = 'concluida'
+or taskInProgress = 'encerrada'
+group by p.id
+having test in
+(select usersFK,u.name from responsible r
+inner join users u on r.usersFK = u.id
+group by usersFK
+)
+;
+
+select usersFK,u.name from responsible r
+inner join users u on r.usersFK = u.id
+group by usersFK
+;
+
+#Crie uma consulta que mostre a média por mês de quantas tarefas são criadas por local
+
+select local, avg(totaldetarefas) from (
+	select l.id local, c.localFK taskFinal, count(*) totaldetarefas from taskFinal c
+	join local l on l.id = c.localFK
+    join taskBase tb on tb.id = c.taskFK 
+	group by c.localFK, l.id
+) subtabela group by local;
+

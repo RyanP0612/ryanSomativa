@@ -1,0 +1,4 @@
+ryan-ramos.mysql.database.azure.com
+ryan-ramos
+Cristiano7     <--- senha
+mysql -h ryan-ramos.mysql.database.azure.com -u ryan-ramos -p '--ssl-ca=DigiCertGlobalRootCA.crt.pem'
